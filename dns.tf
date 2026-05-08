@@ -6,11 +6,11 @@ data "aws_route53_zone" "main" {
 
 # Request the certificate for your subdomain
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "${var.name_prefix}.${var.domain_name}"
+  domain_name       = "${var.project_name}.${var.domain_name}"
   validation_method = "DNS"
 
   tags = {
-    Name = "${var.name_prefix}-cert"
+    Name = "${var.project_name}-cert"
   }
 
   lifecycle {
@@ -44,13 +44,13 @@ resource "aws_acm_certificate_validation" "cert" {
 
 # API resource
 resource "aws_apigatewayv2_api" "api" {
-  name          = "${var.name_prefix}-api"
+  name          = "${var.project_name}-api"
   protocol_type = "HTTP"
 }
 
 # Custom domain name configuration in API Gateway
 resource "aws_apigatewayv2_domain_name" "custom" {
-  domain_name = "${var.name_prefix}.${var.domain_name}"
+  domain_name = "${var.project_name}.${var.domain_name}"
 
   domain_name_configuration {
     certificate_arn = aws_acm_certificate_validation.cert.certificate_arn
@@ -59,7 +59,7 @@ resource "aws_apigatewayv2_domain_name" "custom" {
   }
 }
 
-# Map the custom comain to the API
+# Map the custom domain to the API
 resource "aws_apigatewayv2_api_mapping" "main" {
   api_id      = aws_apigatewayv2_api.api.id
   domain_name = aws_apigatewayv2_domain_name.custom.id
